@@ -33,7 +33,7 @@ library(foreign)
 library(pcse)
 library(car)
 library(regclass)
-
+library(neuralnet)
 library(Matrix)
 library(robust)
 #library(arm)
@@ -47,7 +47,7 @@ library(rms)
 
 
 require(rJava)
-options(java.parameters = "-Xmx50g")     # or 8g, or larger than this, ...
+options(java.parameters = "-Xmx5g")     # or 8g, or larger than this, ...
 require(bartMachine)
 set_bart_machine_num_cores(30)
 ```
@@ -157,4 +157,55 @@ To measure the accuracy of a model we can use a Confusion Matrix. Basically this
 
 ```{r}
 confusion_matrix(m1.glm)
+```
+
+
+
+```{r}
+nn <- neuralnet(y ~ x1 + x2, data=df, 
+                # hidden=c(2,2), 
+                hidden=c(3), 
+
+                linear.output=FALSE, 
+                threshold=0.01)
+plot(nn)
+```
+
+### Making a confusion matrix
+
+```{r}
+#Test the resulting output
+temp_test <- subset(df, select = c("x1","x2"))
+head(temp_test)
+nn.results <- compute(nn, temp_test)
+results <- data.frame(actual = as.numeric(df$y)-1, prediction = nn.results$net.result[,2])
+
+```
+
+```{r}
+roundedresults<-sapply(results,round,digits=0)
+roundedresultsdf=data.frame(roundedresults)
+table(roundedresultsdf$actual,roundedresultsdf$prediction)
+```
+
+
+```{r echo=T, results='hide'}
+
+
+bart <- bartMachine(X = df[,2:3], 
+                    y = df[,1])
+
+```
+
+```{r}
+bart
+```
+
+```{r echo=T, results='hide'}
+
+
+bart2 <- bartMachine(X = df[,2:3], 
+                    y = df[,1],
+                    prob_rule_class = 1-138/1000)
+bart2
 ```
