@@ -1,0 +1,160 @@
+---
+title: "Rare Events"
+author: "Daniel K Baissa"
+date: '2022-09-15'
+pdf_document:
+    toc: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(MLmetrics)
+library(stargazer)
+#library(scatterplot3d)
+# install.packages("clusterSEs")
+library(clusterSEs)
+# install.packages("Zelig")
+# library(Zelig)
+# library(BNN)
+#install.packages("margins")
+library(DataCombine)
+library(Hmisc)
+library(sandwich)
+library(scales)
+library(tidyverse)
+library(sjPlot)
+library(mediation)
+library(ggpubr)
+library(corrr)
+# library(Zelig)
+library(lmtest)
+library(foreign)
+library(pcse)
+library(car)
+library(regclass)
+
+library(Matrix)
+library(robust)
+#library(arm)
+library(mgcv)
+library(splines)
+#library(plotrix)
+library(MASS)
+#library(calibrate)
+library(plm)
+library(rms)
+
+
+require(rJava)
+options(java.parameters = "-Xmx50g")     # or 8g, or larger than this, ...
+require(bartMachine)
+set_bart_machine_num_cores(30)
+```
+
+
+# No Variation Critique
+
+We have heard many critiques along the lines of the following:
+
+Finally, and maybe most crucially, the authors employ a variation based approach to explain an empirical picture with very little variation. After all, authoritarian regimes in the Middle East are very persistent throughout. (In light of this more general point, the selection of dependent variables might overestimate variation where there is very little substantially.) 
+
+* Substantively, I think we can explain that the lit was off by not looking for subtle changes that can compound to a change. Ie, authoritarianism dies by a thousand cuts everywhere else in the world. Why is MENA different? Should we show this death by 1000 cuts? Can we cite lots of scholars who show this instead?
+
+## Rare Events
+
+So since changes in regime can be rare, how well does BART estimate rare events? We can test that!
+
+
+## Ideal Data
+
+
+Let's start by creating a baseline so we can compare the models before moving into rare events. We will start by generating some data.
+
+The functional form of the data will be where y is distributed binomial with probability 
+
+$$ \frac{1}{1 + e^{-z}}$$
+
+and where 
+
+$$ z = -1 + -1\beta_1 + 2\beta_2 $$
+
+So let's generate the data:
+
+```{r}
+
+set.seed(02142)
+x1 <- rnorm(1000) # Variable 1
+x2 <- rnorm(1000) # Variable 2
+
+z <- -1 + -1*x1 + 2*x2 # linear combination with a constant
+pr <- 1/(1+exp(-z)) # pass through an inv-logit function
+
+y <- as.factor(rbinom(1000,1,pr)) 
+
+df <- data.frame(y=y,x1=x1,x2=x2)
+
+```
+
+### Logit
+
+Let's test the Logit Model
+
+```{r}
+m1.glm <- glm(y~x1+x2,data=df,family="binomial")
+
+summary(m1.glm)
+```
+No surprises here. the Logit is more or less accurite. Now let's look at the Logit's confusion Matrix.
+
+#### Accuracy
+
+To measure the accuracy of a model we can use a Confusion Matrix. Basically this tells us how many predictions were correct and how many were false.
+
+```{r}
+confusion_matrix(m1.glm)
+```
+
+## Rare But Easy
+
+$$ \frac{1}{1 + e^{-z}}$$
+
+and where 
+
+$$ z = -2 + -1\beta_1 + 2\beta_2 $$
+
+```{r}
+
+set.seed(02142)
+x1 <- rnorm(1000) # Variable 1
+x2 <- rnorm(1000) # Variable 2
+
+z <- -3 + -1*x1 + 2*x2 # linear combination with a constant
+pr <- 1/(1+exp(-z)) # pass through an inv-logit function
+
+y <- as.factor(rbinom(1000,1,pr)) 
+
+df <- data.frame(y=y,x1=x1,x2=x2)
+
+length(which(df$y == 1))
+```
+
+
+### Logit
+
+Let's test the Logit Model
+
+```{r}
+m1.glm <- glm(y~x1+x2,data=df,family="binomial")
+
+summary(m1.glm)
+```
+No surprises here. the Logit is more or less accurite. Now let's look at the Logit's confusion Matrix.
+
+#### Accuracy
+
+To measure the accuracy of a model we can use a Confusion Matrix. Basically this tells us how many predictions were correct and how many were false.
+
+```{r}
+confusion_matrix(m1.glm)
+```
