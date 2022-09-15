@@ -59,8 +59,6 @@ We have heard many critiques along the lines of the following:
 
 Finally, and maybe most crucially, the authors employ a variation based approach to explain an empirical picture with very little variation. After all, authoritarian regimes in the Middle East are very persistent throughout. (In light of this more general point, the selection of dependent variables might overestimate variation where there is very little substantially.) 
 
-* Substantively, I think we can explain that the lit was off by not looking for subtle changes that can compound to a change. Ie, authoritarianism dies by a thousand cuts everywhere else in the world. Why is MENA different? Should we show this death by 1000 cuts? Can we cite lots of scholars who show this instead?
-
 ## Rare Events
 
 So since changes in regime can be rare, how well does BART estimate rare events? We can test that!
@@ -209,3 +207,6 @@ bart2 <- bartMachine(X = df[,2:3],
                     prob_rule_class = 1-138/1000)
 bart2
 ```
+
+
+
